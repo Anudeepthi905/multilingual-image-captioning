@@ -1,0 +1,19 @@
+# data and generated artifacts
+data/
+features/
+checkpoints/
+*.npy
+*.zip
+*.part
+
+# environments
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+
+# results: keep metrics and plots, drop per-image prediction dumps
+results/predictions_*.csv
+.streamlit/secrets.toml

@@ -1,0 +1,20 @@
+# Core ML
+tensorflow==2.17.1
+keras==3.6.0
+numpy==1.26.4
+pillow==10.4.0
+# Data / plotting
+pandas==2.2.3
+matplotlib==3.9.2
+tqdm==4.66.5
+requests==2.32.3
+# Metrics
+nltk==3.9.1
+rouge-score==0.1.2
+jiwer==3.0.4
+# Accessibility
+deep-translator==1.11.4
+gTTS==2.5.3
+# App + experimental video
+streamlit==1.39.0
+opencv-python-headless==4.10.0.84

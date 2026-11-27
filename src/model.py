@@ -50,7 +50,9 @@ class RNN_Decoder(tf.keras.Model):
         context_vector, attention_weights = self.attention(features, hidden)
         x = self.embedding(x)                                               # (b, 1, emb)
         x = tf.concat([tf.expand_dims(context_vector, 1), x], axis=-1)      # (b, 1, 2*emb)
-        output, state = self.gru(x)
+        # Carry the previous step's state; without initial_state each one-step call
+        # would restart from zeros and the GRU would forget every earlier word.
+        output, state = self.gru(x, initial_state=hidden)
         x = self.fc1(output)                                                # (b, 1, units)
         x = tf.reshape(x, (-1, x.shape[2]))
         return self.fc2(x), state, attention_weights

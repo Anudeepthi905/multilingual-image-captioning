@@ -29,6 +29,23 @@ def test_encoder_and_decoder_shapes():
     assert weights.shape == (batch, 64, 1)
 
 
+def test_decoder_carries_hidden_state_between_steps():
+    """The GRU must start from the hidden state it is given, not from zeros."""
+    tf.keras.utils.set_random_seed(0)
+    enc = CNN_Encoder(256)
+    dec = RNN_Decoder(256, 512, 50)
+    feats = enc(tf.random.normal((1, 64, 2048)))
+    word = tf.ones((1, 1), tf.int64)
+    dec(word, feats, dec.reset_state(1))  # build the layers
+    # Cut the attention path (W2 sees the hidden state), so the hidden state can
+    # only reach the output through the GRU's own memory.
+    for w in dec.attention.W2.weights:
+        w.assign(tf.zeros_like(w))
+    _, s_zero, _ = dec(word, feats, tf.zeros((1, 512)))
+    _, s_rand, _ = dec(word, feats, tf.random.normal((1, 512)))
+    assert not np.allclose(s_zero.numpy(), s_rand.numpy())
+
+
 def test_loss_ignores_padding():
     logits = tf.constant([[5.0, 0.0, 0.0], [0.0, 5.0, 0.0]])
     real_with_pad = tf.constant([0, 1])  # first position is padding

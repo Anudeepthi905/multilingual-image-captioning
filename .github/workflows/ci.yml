@@ -20,6 +20,6 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements-dev.txt
       - name: Lint
-        run: flake8 src tests app.py
+        run: flake8 src tests app.py deploy
       - name: Test
         run: pytest -q

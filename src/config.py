@@ -10,17 +10,11 @@ CHECKPOINT_DIR = Path(os.environ.get("MIC_CHECKPOINT_DIR", ROOT / "checkpoints")
 RESULTS_DIR = Path(os.environ.get("MIC_RESULTS_DIR", ROOT / "results"))
 SAMPLES_DIR = ROOT / "assets" / "samples"
 
-# Where the app finds a trained run when checkpoints/ is empty, tried in this order:
-# 1. A Hugging Face Hub model repo holding one exported run folder (see src/export.py):
-#    set MIC_HF_MODEL_REPO, e.g. "your-hf-username/multilingual-image-captioning".
-#    MIC_HF_MODEL_REVISION pins a branch, tag or commit (default "main").
-#    A private repo also needs HF_TOKEN (read by huggingface_hub).
-# 2. A zipped run folder at MIC_CHECKPOINT_URL (empty by default).
-HF_MODEL_REPO = os.environ.get("MIC_HF_MODEL_REPO", "")
-HF_MODEL_REVISION = os.environ.get("MIC_HF_MODEL_REVISION", "main")
-RELEASE_CHECKPOINT_URL = os.environ.get("MIC_CHECKPOINT_URL", "")
+# When checkpoints/ has no trained run, the app uses an exported run in model/<run>/
+# (made with `python -m src.export`; the Colab notebook downloads it as model.zip).
+BUNDLED_MODEL_DIR = Path(os.environ.get("MIC_BUNDLED_MODEL_DIR", ROOT / "model"))
 
-# Upload limits for the public demo
+# Upload limits in the app
 MAX_UPLOAD_MB = 10
 MAX_IMAGE_PIXELS = 40_000_000      # about 6300 x 6300; larger files are refused
 MAX_VIDEO_MB = 25

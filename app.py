@@ -13,6 +13,7 @@ from PIL import Image
 
 from src import config
 from src.accessibility import LANGUAGES, speak, translate_caption
+from src.caption import available_runs
 from src.uploads import IMAGE_TYPES, VIDEO_TYPES, check_image, check_video
 
 st.set_page_config(page_title="Multilingual Image Captioning", page_icon="🗣️",
@@ -38,14 +39,6 @@ img.thumb { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 
 
 
 # ------------------------------------------------------------------ model loading
-@st.cache_resource(show_spinner=False)
-def find_runs():
-    """Local runs, else download the published run once per server process."""
-    from src.caption import find_or_download_runs
-
-    return find_or_download_runs()
-
-
 @st.cache_resource(show_spinner=False)
 def load_captioner(run_dir: str):
     from src.caption import Captioner
@@ -94,12 +87,7 @@ st.markdown('<p class="skip-hint">Upload a photo or try a sample to hear a descr
             'your language. Use <kbd>Tab</kbd> to move between controls.</p>',
             unsafe_allow_html=True)
 
-with st.spinner("Loading the captioning model (first visit can take a minute) ..."):
-    try:
-        runs = find_runs()
-    except Exception as exc:  # network or Hub errors
-        runs = []
-        st.error(f"The trained model could not be downloaded: {type(exc).__name__}: {exc}")
+runs = available_runs()
 
 with st.sidebar:
     st.header("Settings")
@@ -114,8 +102,8 @@ with st.sidebar:
 beam = 3 if decoding.startswith("Beam") else 1
 
 if not run_dir:
-    st.warning("No trained model is available. Train one (`python -m src.train`) or set "
-               "MIC_HF_MODEL_REPO to a Hugging Face model repo made with `python -m src.export`.")
+    st.warning("No trained model is available. Train one (`python -m src.train` or the Colab "
+               "notebook) so that `checkpoints/` or `model/` holds a run.")
     st.stop()
 with st.spinner("Loading the captioning model ..."):
     captioner = load_captioner(str(run_dir))

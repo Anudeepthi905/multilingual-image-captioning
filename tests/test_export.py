@@ -36,15 +36,12 @@ def test_export_roundtrip_gives_same_caption(tmp_path):
     assert exported == original
 
 
-def test_find_or_download_prefers_local_then_hub(tmp_path, monkeypatch):
-    calls = []
-    monkeypatch.setattr(config, "HF_MODEL_REPO", "someone/model")
-    monkeypatch.setattr(config, "RELEASE_CHECKPOINT_URL", "")
-    monkeypatch.setattr(caption, "download_hf_checkpoint",
-                        lambda checkpoint_dir: calls.append(checkpoint_dir) or ["hub-run"])
+def test_available_runs_prefers_checkpoints_then_model_dir(tmp_path, monkeypatch):
     empty = tmp_path / "none"
-    assert caption.find_or_download_runs(empty) == ["hub-run"] and calls == [empty]
+    monkeypatch.setattr(config, "BUNDLED_MODEL_DIR", tmp_path / "no-model")
+    assert caption.available_runs(empty) == []
 
-    run = _training_run(tmp_path)
-    calls.clear()
-    assert caption.find_or_download_runs(run.parent) == [run] and calls == []
+    run = _training_run(tmp_path)          # tmp_path/checkpoints/tiny
+    monkeypatch.setattr(config, "BUNDLED_MODEL_DIR", run.parent)
+    assert caption.available_runs(empty) == [run]        # falls back to model/
+    assert caption.available_runs(run.parent) == [run]   # checkpoints/ first

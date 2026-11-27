@@ -2,6 +2,7 @@
 data/
 features/
 checkpoints/
+export/
 *.npy
 *.zip
 *.part

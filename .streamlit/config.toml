@@ -1,0 +1,6 @@
+[server]
+# MB. Images are further limited to 10 MB and videos to 25 MB in src/config.py.
+maxUploadSize = 25
+
+[browser]
+gatherUsageStats = false

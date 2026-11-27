@@ -32,9 +32,37 @@ def list_runs(checkpoint_dir: Path = config.CHECKPOINT_DIR) -> list:
     return sorted(runs, key=lambda p: p.stat().st_mtime, reverse=True)
 
 
+def download_hf_checkpoint(repo_id: str = config.HF_MODEL_REPO,
+                           revision: str = config.HF_MODEL_REVISION,
+                           checkpoint_dir: Path = config.CHECKPOINT_DIR) -> list:
+    """Download an exported run folder from a Hugging Face model repo into checkpoints/.
+
+    The repo holds one run at its root (config.json, vocab.json, checkpoint, ckpt-*),
+    as written by `python -m src.export`. Files already downloaded are reused.
+    """
+    from huggingface_hub import snapshot_download
+
+    if not repo_id:
+        raise ValueError("No Hugging Face model repo set (MIC_HF_MODEL_REPO).")
+    target = Path(checkpoint_dir) / ("hf-" + repo_id.split("/")[-1])
+    snapshot_download(repo_id=repo_id, revision=revision, local_dir=target,
+                      allow_patterns=["config.json", "vocab.json", "checkpoint", "ckpt-*"])
+    return list_runs(checkpoint_dir)
+
+
+def find_or_download_runs(checkpoint_dir: Path = config.CHECKPOINT_DIR) -> list:
+    """Local runs first; otherwise the Hugging Face repo; otherwise the zip URL."""
+    runs = list_runs(checkpoint_dir)
+    if not runs and config.HF_MODEL_REPO:
+        runs = download_hf_checkpoint(checkpoint_dir=checkpoint_dir)
+    if not runs and config.RELEASE_CHECKPOINT_URL:
+        runs = download_release_checkpoint(checkpoint_dir=checkpoint_dir)
+    return runs
+
+
 def download_release_checkpoint(url: str = config.RELEASE_CHECKPOINT_URL,
                                 checkpoint_dir: Path = config.CHECKPOINT_DIR) -> list:
-    """Download and unzip a released run folder into checkpoints/."""
+    """Download and unzip a zipped run folder into checkpoints/."""
     r = requests.get(url, timeout=120)
     r.raise_for_status()
     Path(checkpoint_dir).mkdir(parents=True, exist_ok=True)

@@ -10,14 +10,20 @@ CHECKPOINT_DIR = Path(os.environ.get("MIC_CHECKPOINT_DIR", ROOT / "checkpoints")
 RESULTS_DIR = Path(os.environ.get("MIC_RESULTS_DIR", ROOT / "results"))
 SAMPLES_DIR = ROOT / "assets" / "samples"
 
-# Zipped run folder (checkpoint + vocab.json + config.json) published as a GitHub
-# Release asset. The app downloads it when checkpoints/ is empty.
-# Override with the MIC_CHECKPOINT_URL environment variable.
-RELEASE_CHECKPOINT_URL = os.environ.get(
-    "MIC_CHECKPOINT_URL",
-    "https://github.com/Anudeepthi905/multilingual-image-captioning/releases/download/"
-    "v1.0/checkpoint.zip",
-)
+# Where the app finds a trained run when checkpoints/ is empty, tried in this order:
+# 1. A Hugging Face Hub model repo holding one exported run folder (see src/export.py):
+#    set MIC_HF_MODEL_REPO, e.g. "your-hf-username/multilingual-image-captioning".
+#    MIC_HF_MODEL_REVISION pins a branch, tag or commit (default "main").
+#    A private repo also needs HF_TOKEN (read by huggingface_hub).
+# 2. A zipped run folder at MIC_CHECKPOINT_URL (empty by default).
+HF_MODEL_REPO = os.environ.get("MIC_HF_MODEL_REPO", "")
+HF_MODEL_REVISION = os.environ.get("MIC_HF_MODEL_REVISION", "main")
+RELEASE_CHECKPOINT_URL = os.environ.get("MIC_CHECKPOINT_URL", "")
+
+# Upload limits for the public demo
+MAX_UPLOAD_MB = 10
+MAX_IMAGE_PIXELS = 40_000_000      # about 6300 x 6300; larger files are refused
+MAX_VIDEO_MB = 25
 
 COCO_ANNOTATIONS_URL = "http://images.cocodataset.org/annotations/annotations_trainval2014.zip"
 COCO_TRAIN_ZIP_URL = "http://images.cocodataset.org/zips/train2014.zip"

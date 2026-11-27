@@ -1,0 +1,16 @@
+.git
+.github
+.venv
+venv
+__pycache__
+*.pyc
+.pytest_cache
+data/
+features/
+checkpoints/
+export/
+results/
+notebooks/
+tests/
+deploy/
+.streamlit/secrets.toml
